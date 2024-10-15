@@ -1,0 +1,60 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.11.35303.130
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "azure-semantic-kernel-quickstart", "azure-semantic-kernel-quickstart\azure-semantic-kernel-quickstart.csproj", "{93614938-1771-4593-862F-CBD6BC8E2AD1}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{0E0EF229-3DF4-4E55-ADE1-52845A74CC82}"
+	ProjectSection(SolutionItems) = preProject
+		.editorconfig = .editorconfig
+	EndProjectSection
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "azure-semantic-kernel-memory", "azure-semantic-kernel-memory\azure-semantic-kernel-memory.csproj", "{7C230E7A-CAE3-4960-B589-8792C639C213}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "kernel-memory-with-semantic-kernel", "kernel-memory-with-semantic-kernel\kernel-memory-with-semantic-kernel.csproj", "{1E49A1B1-3AF8-48C1-9E57-65AA5387D20B}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ChatBot", "ChatBot", "{A572AE9D-CB60-4C81-898C-DE1FBE12C2A9}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "IP-ChatBot-Blazor", "IP-ChatBot-Blazor\IP-ChatBot-Blazor.csproj", "{2F8F2141-275D-45B6-AEFA-AEAEC43A3163}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IP.Chatbot.WebAPI", "IP.Chatbot.WebAPI\IP.Chatbot.WebAPI.csproj", "{D41F4A16-A4EC-4823-896B-67DA549E0CAA}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{93614938-1771-4593-862F-CBD6BC8E2AD1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{93614938-1771-4593-862F-CBD6BC8E2AD1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{93614938-1771-4593-862F-CBD6BC8E2AD1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{93614938-1771-4593-862F-CBD6BC8E2AD1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7C230E7A-CAE3-4960-B589-8792C639C213}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7C230E7A-CAE3-4960-B589-8792C639C213}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7C230E7A-CAE3-4960-B589-8792C639C213}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7C230E7A-CAE3-4960-B589-8792C639C213}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1E49A1B1-3AF8-48C1-9E57-65AA5387D20B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1E49A1B1-3AF8-48C1-9E57-65AA5387D20B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1E49A1B1-3AF8-48C1-9E57-65AA5387D20B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1E49A1B1-3AF8-48C1-9E57-65AA5387D20B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2F8F2141-275D-45B6-AEFA-AEAEC43A3163}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2F8F2141-275D-45B6-AEFA-AEAEC43A3163}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2F8F2141-275D-45B6-AEFA-AEAEC43A3163}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2F8F2141-275D-45B6-AEFA-AEAEC43A3163}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D41F4A16-A4EC-4823-896B-67DA549E0CAA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D41F4A16-A4EC-4823-896B-67DA549E0CAA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D41F4A16-A4EC-4823-896B-67DA549E0CAA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D41F4A16-A4EC-4823-896B-67DA549E0CAA}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{2F8F2141-275D-45B6-AEFA-AEAEC43A3163} = {A572AE9D-CB60-4C81-898C-DE1FBE12C2A9}
+		{D41F4A16-A4EC-4823-896B-67DA549E0CAA} = {A572AE9D-CB60-4C81-898C-DE1FBE12C2A9}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {4EED70FA-9968-46A0-96F3-B7FB87BEEFBE}
+	EndGlobalSection
+EndGlobal

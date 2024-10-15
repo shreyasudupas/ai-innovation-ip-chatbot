@@ -1,0 +1,32 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net8.0</TargetFramework>
+    <RootNamespace>kernel_memory_with_semantic_kernel</RootNamespace>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <UserSecretsId>9637645d-0166-4643-a43a-ef7a19cfb6dd</UserSecretsId>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Remove="datafabric-agent-guide.docx" />
+    <None Remove="retry-mechanism-for-events-datafabric.docx" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="datafabric-agent-guide.docx">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="retry-mechanism-for-events-datafabric.docx">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.KernelMemory.Core" Version="0.75.240924.1" />
+    <PackageReference Include="Microsoft.KernelMemory.SemanticKernelPlugin" Version="0.75.240924.1" />
+    <PackageReference Include="Microsoft.SemanticKernel" Version="1.21.1" />
+  </ItemGroup>
+
+</Project>
