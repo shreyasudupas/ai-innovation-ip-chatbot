@@ -1,0 +1,75 @@
+﻿@page "/ChatInteraction"
+@rendermode InteractiveServer
+
+<PageTitle>Chat Interaction</PageTitle>
+
+
+<MudGrid Spacing="3" Justify="Justify.Center">
+    <MudItem xs="12">
+        <MudPaper Height="calc(10vh - 20px)" Width="calc(85vw - 100px)">
+            Header
+        </MudPaper>
+    </MudItem>
+    <MudItem xs="12">
+        <MudPaper Height="calc(70vh - 60px)" Width="calc(85vw - 100px)">
+            <div class="chat-container">
+                @foreach (var chat in chats)
+                {
+                    <div class="chat-content">
+                        @chat
+                    </div>
+                }
+            </div>
+            
+        </MudPaper>
+    </MudItem>
+    <MudItem xs="12">
+        <MudPaper Height="calc(20vh - 20px)" Width="calc(85vw - 100px)">
+            <div class="footer-container">
+                <MudTextField @bind-Value="sampleText" Label="Enter your Query" Variant="Variant.Text"></MudTextField>
+                <MudButton StartIcon="fas fa-paper-plane" Color="Color.Info" Variant="Variant.Filled">Send</MudButton>
+            </div>
+            
+        </MudPaper>
+    </MudItem>
+</MudGrid>
+
+@code {
+    private string sampleText = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.";
+
+    private List<string> chats = new List<string>();
+
+    protected override void OnInitialized()
+    {
+        for(int i=0;i<5;i++)
+        {
+            chats.Add(sampleText);
+        }
+    }
+}
+
+<style>
+    .chat-container {
+        display: flex;
+        flex-direction: column;
+        padding: 14px;
+        gap: 2px;
+    }
+
+    .chat-content {
+        border: 1px solid black;
+        min-height: 8vh;
+        background-color: cornflowerblue;
+        font-family: Arial;
+        overflow-wrap: break-word;
+    }
+
+    div.chat-container {
+        width: calc(85vw - 100px);
+        height: calc(70vh - 60px);
+        overflow-x: hidden;
+        overflow-y: auto;
+        text-align: center;
+        padding: 20px;
+    }
+</style>

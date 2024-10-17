@@ -18,7 +18,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ChatBot", "ChatBot", "{A572
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "IP-ChatBot-Blazor", "IP-ChatBot-Blazor\IP-ChatBot-Blazor.csproj", "{2F8F2141-275D-45B6-AEFA-AEAEC43A3163}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IP.Chatbot.WebAPI", "IP.Chatbot.WebAPI\IP.Chatbot.WebAPI.csproj", "{D41F4A16-A4EC-4823-896B-67DA549E0CAA}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "IP.Chatbot.WebAPI", "IP.Chatbot.WebAPI\IP.Chatbot.WebAPI.csproj", "{D41F4A16-A4EC-4823-896B-67DA549E0CAA}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
