@@ -1,3 +1,4 @@
+using IP.ChatBot.Blazor.Services;
 using IP_ChatBot_Blazor.Components;
 using MudBlazor.Services;
 
@@ -6,6 +7,17 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
+builder.Services.AddScoped<IChatBotService, ChatBotService>();
+
+builder.Services.AddLogging(builder =>
+{
+    builder.AddConsole();
+});
+
+builder.Services.AddHttpClient("ChatbotService",sb =>
+{
+    sb.BaseAddress = new Uri("https://localhost:7154/ChatBot/");
+});
 
 builder.Services.AddMudServices();
 

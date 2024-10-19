@@ -1,0 +1,121 @@
+﻿@page "/ChatInteraction"
+@rendermode InteractiveServer
+@inherits ChatbotBase
+
+<PageTitle>Chat Interaction</PageTitle>
+
+
+<MudGrid Spacing="3" Justify="Justify.Center">
+    <MudItem xs="12">
+        <MudPaper Height="calc(10vh - 20px)" Width="calc(85vw - 100px)">
+            <div class="header-container">
+                <div class="header-logo">
+                    <MudAvatar>
+                        <MudImage Src="images/epicor_logo.png"></MudImage>
+                    </MudAvatar>
+                </div>
+                <div class="header-content">
+                    AI Assistant
+                </div>
+            </div>
+        </MudPaper>
+    </MudItem>
+    <MudItem xs="12">
+        <MudPaper Height="calc(70vh - 60px)" Width="calc(85vw - 100px)">
+            <div id="chat-container" class="chat-container">
+                <div class="message-container">
+                    @foreach (var chat in chatMessages)
+                    {
+                        if(chat.UserType == "User")
+                        {
+                            <div class="message sender-message">
+                                @chat.Content
+                            </div>
+                            <span class="sender-created-date">
+                                @chat.CreatedDate
+                            </span>
+                        }
+                        else
+                        {
+                            <div class="message receiver-message">
+                                @chat.Content
+                            </div>
+                            <span class="receiver-created-date">
+                                @chat.CreatedDate
+                            </span>
+                        }
+                    }
+                </div>
+            </div>
+            
+        </MudPaper>
+    </MudItem>
+    <MudItem xs="12">
+        <MudPaper Height="calc(20vh - 20px)" Width="calc(85vw - 100px)">
+            <div class="footer-container">
+                <MudTextField @bind-Value="UserMessage" Label="Enter your Query" Variant="Variant.Text"></MudTextField>
+                <MudButton StartIcon="fas fa-paper-plane" Color="Color.Info" Variant="Variant.Filled" OnClick="SendUserMessage">Send</MudButton>
+            </div>
+            
+        </MudPaper>
+    </MudItem>
+</MudGrid>
+
+<style>
+    
+
+    .message-container {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .message {
+        padding: 10px;
+        margin: 10px;
+        border-radius: 5px;
+        max-width: 70%;
+        word-wrap: break-word;
+        display: flex;
+        align-items: center;
+    }
+
+    .sender-message {
+        background-color: #e0e0e0;
+        color: #000;
+        align-self: flex-start;
+    }
+
+    .receiver-message {
+        background-color: royalblue;
+        color: #fff;
+        align-self: flex-end;
+    }
+
+    div.chat-container {
+        width: calc(85vw - 100px);
+        height: calc(70vh - 60px);
+        overflow-x: hidden;
+        overflow-y: scroll;
+        text-align: center;
+        padding: 20px;
+    }
+
+    .sender-created-date {
+        font-family: Arial;
+        font-size: 12px;
+        color: grey;
+        margin-left: 16px;
+        justify-content: flex-start;
+        display: flex;
+    }
+
+    .receiver-created-date {
+        font-family: Arial;
+        font-size: 12px;
+        color: grey;
+        margin-right: 20px;
+        justify-content: flex-end;
+        display: flex;
+    }
+
+</style>

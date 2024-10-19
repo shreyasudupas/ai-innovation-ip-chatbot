@@ -23,6 +23,7 @@ builder.Services.AddTransient((serviceProvider) => memory);
 await AddFileToMemoryForInjestion(memory);
 
 //kernel registration
+builder.Services.AddSingleton<ChatHistory>();
 
 // Finally, create the Kernel service with the service provider and plugin collection
 builder.Services.AddTransient((serviceProvider) => {
@@ -32,7 +33,7 @@ builder.Services.AddTransient((serviceProvider) => {
     return kernel;
 });
 
-builder.Services.AddSingleton(()=> new ChatHistory());
+
 
 var app = builder.Build();
 

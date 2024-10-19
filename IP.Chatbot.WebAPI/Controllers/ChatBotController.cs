@@ -1,3 +1,4 @@
+using IP.Chatbot.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.KernelMemory;
 using Microsoft.SemanticKernel;
@@ -8,7 +9,7 @@ namespace IP.Chatbot.WebAPI.Controllers
 #pragma warning disable SKEXP0001 // Type is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.
 
     [ApiController]
-    [Route("[controller]/[action]/api")]
+    [Route("[controller]/api/[action]")]
     public class ChatBotController : ControllerBase
     {
         private readonly Kernel _kernel;
@@ -30,8 +31,10 @@ namespace IP.Chatbot.WebAPI.Controllers
 
 
         [HttpGet(Name = "GetAnswer")]
-        public async Task<MemoryAnswer> GetAnswer(string question,string authorName)
+        public async Task<ChatMessage> GetAnswer(string question,string authorName)
         {
+            var result = new ChatMessage();
+
             var prompt = $@"
             {{memory.ask}} {question} 
             If Kernel Memory doesn't know the answer, say 'I don't know'.
@@ -53,8 +56,8 @@ namespace IP.Chatbot.WebAPI.Controllers
                     )
                     ]
             });
-                                 
-            var result = await _memoryWebClient.AskAsync(prompt);
+
+            var kernelMemoryResult = await _memoryWebClient.AskAsync(prompt);
 
             //Console.WriteLine($"\n AI Assistant: {result.Result}\n\n");
 
@@ -67,10 +70,23 @@ namespace IP.Chatbot.WebAPI.Controllers
                     functionName: "ask",
                     pluginName: "memory",
                     callId: "001",
-                    result: result
+                    result: kernelMemoryResult
                    )
                 ]
             });
+
+            result.UserType = "ChatBot";
+            result.Content = kernelMemoryResult.Result;
+            
+            foreach(var source in kernelMemoryResult.RelevantSources)
+            {
+                result.RelavantSources.Add(new()
+                {
+                    DocumentId = source.DocumentId,
+                    SourceName = source.SourceName,
+                    LastUpdatedDate = source.Partitions.First().LastUpdate.ToString()
+                });
+            }
 
             return result;
         }
