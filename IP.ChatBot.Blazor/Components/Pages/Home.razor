@@ -1,7 +1,58 @@
 ﻿@page "/"
+@using IP.ChatBot.Blazor.Services
 
 <PageTitle>Home</PageTitle>
 
-<h1>Hello, world!</h1>
+<div class="home-container">
+    Welcome to CogniChat app. 
+    @if (hideLoginButton)
+    {
+        <label>Please login to continue..</label>
+    }
 
-Welcome to your new app.
+    <div>
+        <MudTextField @bind-Value="loggedInUser" Label="Enter Username" Variant="Variant.Outlined"></MudTextField>
+        
+        @if(hideLoginButton)
+        {
+            <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="Login">Login</MudButton>
+        }
+        
+    </div>
+</div>
+
+@code {
+    private string loggedInUser = "";
+    private bool hideLoginButton = true;
+
+    [Inject]
+    public LoginUser LoginUser { get; set; }
+
+    protected override void OnInitialized()
+    {
+        if(!string.IsNullOrEmpty(LoginUser.Username))
+        {
+            loggedInUser = LoginUser.Username;
+            hideLoginButton = false;
+        }
+    }
+
+    public void Login()
+    {
+        if (!string.IsNullOrEmpty(loggedInUser))
+        {
+            LoginUser.Username = loggedInUser;
+            hideLoginButton = !hideLoginButton;
+        }
+    }
+}
+
+<style>
+    .home-container {
+        padding: 10px;
+        font-family: cursive;
+        font-size: 3vh;
+    }
+</style>
+
+

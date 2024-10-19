@@ -17,6 +17,9 @@ namespace IP.ChatBot.Blazor.Components.Pages
 
         protected string UserMessage { get; set; } = string.Empty;
 
+        [Inject]
+        public LoginUser LoginUser { get; set; }
+
         protected override void OnInitialized()
         {
             chatMessages = new();
@@ -36,9 +39,7 @@ namespace IP.ChatBot.Blazor.Components.Pages
                 CreatedDate = DateTime.Now.ToString("HH:mm tt")
             });
 
-
-
-            if (!string.IsNullOrEmpty(UserMessage))
+            if (!string.IsNullOrEmpty(UserMessage) && !(string.IsNullOrEmpty(LoginUser.Username)))
             {
                 var answer = await _chatbotService.GetMessageFromAIModel("shreyas", UserMessage);
 

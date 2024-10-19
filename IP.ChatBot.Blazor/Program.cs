@@ -8,6 +8,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 builder.Services.AddScoped<IChatBotService, ChatBotService>();
+builder.Services.AddSingleton<LoginUser>();
 
 builder.Services.AddLogging(builder =>
 {
