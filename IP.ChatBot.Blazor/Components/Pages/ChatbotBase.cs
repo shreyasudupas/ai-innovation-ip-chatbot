@@ -20,6 +20,8 @@ namespace IP.ChatBot.Blazor.Components.Pages
         [Inject]
         public LoginUser LoginUser { get; set; }
 
+        protected bool loadingChatMessage = false;
+
         protected override void OnInitialized()
         {
             chatMessages = new();
@@ -32,16 +34,20 @@ namespace IP.ChatBot.Blazor.Components.Pages
 
         protected async Task SendUserMessage()
         {
+            var question = UserMessage;
+            UserMessage = string.Empty;
+            loadingChatMessage = true;
+
             chatMessages.Add(new()
             {
                 UserType = "User",
-                Content = UserMessage,
+                Content = question,
                 CreatedDate = DateTime.Now.ToString("HH:mm tt")
             });
 
-            if (!string.IsNullOrEmpty(UserMessage) && !(string.IsNullOrEmpty(LoginUser.Username)))
+            if (!string.IsNullOrEmpty(question) && !(string.IsNullOrEmpty(LoginUser.Username)))
             {
-                var answer = await _chatbotService.GetMessageFromAIModel("shreyas", UserMessage);
+                var answer = await _chatbotService.GetMessageFromAIModel(LoginUser.Username, question);
 
                 if (answer != null)
                 {
@@ -54,8 +60,7 @@ namespace IP.ChatBot.Blazor.Components.Pages
                     });
                 }
             }
-            UserMessage = string.Empty;
+            loadingChatMessage = false;
         }
-
     }
 }

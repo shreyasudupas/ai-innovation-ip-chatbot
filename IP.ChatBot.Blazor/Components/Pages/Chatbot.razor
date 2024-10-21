@@ -4,62 +4,78 @@
 
 <PageTitle>Chat Interaction</PageTitle>
 
+@if (string.IsNullOrEmpty(LoginUser.Username))
+{
+    <div>
+        <h3>Please login first in order to Chat</h3>
+    </div>
+}
+else
+{
+    <MudGrid Spacing="3" Justify="Justify.Center">
+        <MudItem xs="12">
+            <MudPaper Height="calc(10vh - 20px)" Width="calc(85vw)">
+                <div class="header-container">
+                    <div class="header-logo">
+                        <MudAvatar>
+                            <MudImage Src="images/epicor_logo.png"></MudImage>
+                        </MudAvatar>
+                    </div>
+                    <div class="header-content">
+                        CogniChat
+                    </div>
+                </div>
+            </MudPaper>
+        </MudItem>
+        <MudItem xs="12">
+            <MudPaper Height="calc(70vh)" Width="calc(85vw)">
+                <div id="chat-container" class="chat-container">
+                    <div class="message-container">
+                        @foreach (var chat in chatMessages)
+                        {
+                            if (chat.UserType == "User")
+                            {
+                                <div class="message sender-message">
+                                    @chat.Content
+                                </div>
+                                <span class="sender-created-date">
+                                    @chat.CreatedDate
+                                </span>
+                            }
+                            else
+                            {
+                                <div class="message receiver-message">
+                                    @chat.Content
+                                </div>
+                                <span class="receiver-created-date">
+                                    @chat.CreatedDate
+                                </span>
+                            }
+                        }
 
-<MudGrid Spacing="3" Justify="Justify.Center">
-    <MudItem xs="12">
-        <MudPaper Height="calc(10vh - 20px)" Width="calc(85vw - 100px)">
-            <div class="header-container">
-                <div class="header-logo">
-                    <MudAvatar>
-                        <MudImage Src="images/epicor_logo.png"></MudImage>
-                    </MudAvatar>
-                </div>
-                <div class="header-content">
-                    CogniChat
-                </div>
-            </div>
-        </MudPaper>
-    </MudItem>
-    <MudItem xs="12">
-        <MudPaper Height="calc(70vh - 60px)" Width="calc(85vw - 100px)">
-            <div id="chat-container" class="chat-container">
-                <div class="message-container">
-                    @foreach (var chat in chatMessages)
-                    {
-                        if(chat.UserType == "User")
+                        @if (loadingChatMessage)
                         {
-                            <div class="message sender-message">
-                                @chat.Content
+                            <div class="loading-message">
+                                <MudSkeleton SkeletonType="SkeletonType.Rectangle" Width="350px" Height="50px" />
                             </div>
-                            <span class="sender-created-date">
-                                @chat.CreatedDate
-                            </span>
                         }
-                        else
-                        {
-                            <div class="message receiver-message">
-                                @chat.Content
-                            </div>
-                            <span class="receiver-created-date">
-                                @chat.CreatedDate
-                            </span>
-                        }
-                    }
+                    </div>
                 </div>
-            </div>
-            
-        </MudPaper>
-    </MudItem>
-    <MudItem xs="12">
-        <MudPaper Height="calc(20vh - 20px)" Width="calc(85vw - 100px)">
-            <div class="footer-container">
-                <MudTextField @bind-Value="UserMessage" Label="Enter your Query" Variant="Variant.Text"></MudTextField>
-                <MudButton StartIcon="fas fa-paper-plane" Color="Color.Info" Variant="Variant.Filled" OnClick="SendUserMessage">Send</MudButton>
-            </div>
-            
-        </MudPaper>
-    </MudItem>
-</MudGrid>
+
+            </MudPaper>
+        </MudItem>
+        <MudItem xs="12">
+            <MudPaper Height="calc(20vh)" Width="calc(85vw)">
+                <div class="footer-container">
+                    <MudTextField @bind-Value="UserMessage" Label="Enter your Query" Variant="Variant.Text"></MudTextField>
+                    <MudButton StartIcon="fas fa-paper-plane" Color="Color.Info" Variant="Variant.Filled" OnClick="SendUserMessage">Send</MudButton>
+                </div>
+
+            </MudPaper>
+        </MudItem>
+    </MudGrid>
+}
+
 
 <style>
     
@@ -91,9 +107,14 @@
         align-self: flex-end;
     }
 
+    .loading-message {
+        display: flex;
+        align-self: flex-end;
+    }
+
     div.chat-container {
-        width: calc(85vw - 100px);
-        height: calc(70vh - 60px);
+        width: calc(85vw);
+        height: calc(70vh);
         overflow-x: hidden;
         overflow-y: scroll;
         text-align: center;
