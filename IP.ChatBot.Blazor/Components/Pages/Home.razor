@@ -1,5 +1,6 @@
 ﻿@page "/"
 @using IP.ChatBot.Blazor.Services
+@inject NavigationManager NavigationManager
 
 <PageTitle>Home</PageTitle>
 
@@ -43,6 +44,7 @@
         {
             LoginUser.Username = loggedInUser;
             hideLoginButton = !hideLoginButton;
+            NavigationManager.NavigateTo("ChatInteraction");
         }
     }
 }

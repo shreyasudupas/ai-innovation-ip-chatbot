@@ -62,5 +62,10 @@ namespace IP.ChatBot.Blazor.Components.Pages
             }
             loadingChatMessage = false;
         }
+
+        protected async Task clearChat()
+        {
+            chatMessages = new();
+        }
     }
 }

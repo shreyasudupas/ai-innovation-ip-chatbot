@@ -69,6 +69,7 @@ else
                 <div class="footer-container">
                     <MudTextField @bind-Value="UserMessage" Label="Enter your Query" Variant="Variant.Text"></MudTextField>
                     <MudButton StartIcon="fas fa-paper-plane" Color="Color.Info" Variant="Variant.Filled" OnClick="SendUserMessage">Send</MudButton>
+                    <MudButton StartIcon="fas fa-trash" Color="Color.Info" Variant="Variant.Filled" OnClick="clearChat">Clear chat</MudButton>
                 </div>
 
             </MudPaper>
