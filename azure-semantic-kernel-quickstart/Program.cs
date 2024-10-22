@@ -1,4 +1,5 @@
 ﻿using Azure.AI.OpenAI.Chat;
+using azure_semantic_kernel_quickstart;
 using Microsoft.Extensions.Configuration;
 using Microsoft.SemanticKernel;
 using Microsoft.SemanticKernel.Connectors.AzureOpenAI;
@@ -9,31 +10,34 @@ var config = new ConfigurationBuilder()
     .AddUserSecrets<Program>()
     .Build();
 
-var kernel = Kernel.CreateBuilder()
-    .AddAzureOpenAIChatCompletion(
-        deploymentName: config["AZURE_OPENAI_DEPLOYMENT_NAME"],
-        endpoint: config["AZURE_OPENAI_ENDPOINT"],
-        apiKey: config["AZURE_OPENAI_API_KEY"])
-    .Build();
+//var kernel = Kernel.CreateBuilder()
+//    .AddAzureOpenAIChatCompletion(
+//        deploymentName: config["AZURE_OPENAI_DEPLOYMENT_NAME"],
+//        endpoint: config["AZURE_OPENAI_ENDPOINT"],
+//        apiKey: config["AZURE_OPENAI_API_KEY"])
+//    .Build();
 
-Console.WriteLine("This is AI Chatbot. Please Ask your Question related to Datafabric App");
-var ask = Console.ReadLine();
+//Console.WriteLine("This is AI Chatbot. Please Ask your Question related to Datafabric App");
+//var ask = Console.ReadLine();
 
-var function = kernel.CreateFunctionFromPrompt("Question: {{$input}}");
+//var function = kernel.CreateFunctionFromPrompt("Question: {{$input}}");
 
-// Chat Completion example
-var dataSource = GetAzureSearchDataSource(config);
+//// Chat Completion example
+//var dataSource = GetAzureSearchDataSource(config);
 
-var promptExecutionSettings = new AzureOpenAIPromptExecutionSettings 
-{ 
-    AzureChatDataSource = dataSource,
-    Temperature = 0,
-};
+//var promptExecutionSettings = new AzureOpenAIPromptExecutionSettings
+//{
+//    AzureChatDataSource = dataSource,
+//    Temperature = 0,
+//};
 
-var response = await kernel.InvokeAsync(function, new(promptExecutionSettings) { ["input"] = ask });
+//var response = await kernel.InvokeAsync(function, new(promptExecutionSettings) { ["input"] = ask });
 
-Console.WriteLine($"Response: {response.GetValue<string>()}");
-Console.WriteLine();
+//Console.WriteLine($"Response: {response.GetValue<string>()}");
+//Console.WriteLine();
+
+PhiLocalLMExample lam = new PhiLocalLMExample();
+await lam.Run();
 
 
 static AzureSearchChatDataSource GetAzureSearchDataSource(IConfigurationRoot config)
