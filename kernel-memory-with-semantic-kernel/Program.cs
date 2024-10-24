@@ -5,7 +5,9 @@ using Microsoft.Extensions.Logging;
 using Microsoft.KernelMemory;
 using Microsoft.SemanticKernel;
 using Microsoft.SemanticKernel.ChatCompletion;
+using Microsoft.SemanticKernel.Connectors.OpenAI;
 using System.Reflection;
+using System.Text;
 
 #pragma warning disable SKEXP0001 // Type is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.
 
@@ -23,9 +25,12 @@ var memory = kernelMemoryBuilder.Build<MemoryServerless>();
 
 await AddFileToMemoryForInjestion(memory);
 
-await ChatUsingPrompt(memory, kernel);
+//await ChatUsingPrompt(memory, kernel);
 
 //await ChatUsingFunctionInvoke(memory, kernel);
+
+var chatCompletionService = kernel.GetRequiredService<IChatCompletionService>();
+await ChatUsingSemanticKernel_KernelMemory_Chat(memory,chatCompletionService);
 
 static IKernelBuilder BuildKernel(IConfigurationRoot configuration)
 {
@@ -33,12 +38,12 @@ static IKernelBuilder BuildKernel(IConfigurationRoot configuration)
 
     builder.Services.AddLogging(c => c.AddDebug().SetMinimumLevel(LogLevel.Trace));
 
-    //builder.AddAzureOpenAIChatCompletion(
-    //    deploymentName: configuration["AZURE_OPENAI_DEPLOYMENT_NAME"],
-    //    endpoint: configuration["AZURE_OPENAI_ENDPOINT"],
-    //    apiKey: configuration["AZURE_OPENAI_API_KEY"]
-    //    );
-    ;
+    builder.AddAzureOpenAIChatCompletion(
+        deploymentName: configuration["AZURE_OPENAI_DEPLOYMENT_NAME"],
+        endpoint: configuration["AZURE_OPENAI_ENDPOINT"],
+        apiKey: configuration["AZURE_OPENAI_API_KEY"]
+        );
+    //;
     return builder;
 }
 
@@ -94,17 +99,20 @@ static async Task ChatUsingPrompt(MemoryServerless memory,Kernel kernel)
     var plugin = new MemoryPlugin(memory, waitForIngestionToComplete: true);
     kernel.ImportPluginFromObject(plugin, "memory");
 
+
     //OpenAIPromptExecutionSettings settings = new()
     //{
-    //    ToolCallBehavior = ToolCallBehavior.AutoInvokeKernelFunctions,
+    //    Temperature = 0
     //};
 
     var chatHistory = new ChatHistory();
-    //var chatCompletionService = kernel.GetRequiredService<IChatCompletionService>();
+    var history = new StringBuilder();
+    var chatCompletionService = kernel.GetRequiredService<IChatCompletionService>();
 
+    Console.WriteLine("\nAsk the Question related to the file uploaded. To exit type bye!,\n\n");
     while (true)
     {
-        Console.Write("\nAsk the Question related to the file uploaded. To exit type bye!,\n\n User> ");
+        Console.Write(" User: ");
         var message = Console.ReadLine();
 
         if(string.Equals(message,"bye",StringComparison.InvariantCultureIgnoreCase))
@@ -112,31 +120,56 @@ static async Task ChatUsingPrompt(MemoryServerless memory,Kernel kernel)
             break;
         }
 
+        //var prompt = $@"
+        //    {{memory.ask}} {message} 
+        //    If Kernel Memory doesn't know the answer, say 'I don't know'.
+
+        //     Question to Kernel Memory: {message}
+        //    ";
+
         var prompt = $@"
-            {{memory.ask}} {message} 
-            If Kernel Memory doesn't know the answer, say 'I don't know'.
+        You are a chat assistant providing product information based on available documents. Your goal is to summarize answers as concisely as possible.
+        Question to kernel memory: {message}
+        AI response: {{memory.ask}}
 
-             Question to Kernel Memory: {message}
-            ";
+        For follow-up questions, refer to the conversation history using the context below:
+        Context for follow-up questions: {history.ToString()}
 
+        If the question cannot be answered fully or if the user is dissatisfied with the response, reply with:
+        Fallback for incomplete answers: ""I don't have that information. Please create a ticket in the ServiceNow portal.""
 
+        For unrelated or general questions, respond with:
+        Response for unrelated queries: ""I'm sorry, I'm not aware of this. Please ask something related to the product.""
+        ";
+
+        chatHistory.Add(new()
+        {
+            Role = AuthorRole.System,
+            Content = "You are a helpful assistant"
+        });
+        
         chatHistory.Add(new ChatMessageContent
         {
             Role = AuthorRole.User,
             Items = [
                 new FunctionCallContent(
-                    functionName: "ask",
+                    functionName: "ask_user_history",
                     pluginName: "memory",
                     id: "001",
                     arguments: new() { { "question", message } }
                     )
                 ]
         });
-        //var result = await chatCompletionService.GetChatMessageContentAsync(chatHistory, settings, kernel);
+        //var result = await chatCompletionService.GetChatMessageContentAsync(chatHistory,
+        //    settings,
+        //    kernel);
         var result = await memory.AskAsync(prompt);
 
-        Console.WriteLine($"\n AI Assistant: {result.Result}\n\n");
-        
+        Console.WriteLine($"\n AI Bot: {result.Result}\n\n");
+        history.Append($"Question to kernel memory: {message}\n AI Bot: {result.Result}\n");
+
+        //Console.WriteLine($"AI Bot: {result}\n");
+
         chatHistory.Add(new ChatMessageContent
         {
             Role = AuthorRole.Assistant,
@@ -146,7 +179,7 @@ static async Task ChatUsingPrompt(MemoryServerless memory,Kernel kernel)
                     pluginName: "memory",
                     callId: "001",
                     result: result
-                   )    
+                   )
             ]
         });
     }
@@ -201,5 +234,55 @@ static async Task ChatUsingFunctionInvoke(MemoryServerless memory, Kernel kernel
         {
             Console.WriteLine($"File name: {source.SourceName} - {source.DocumentId} - {source.Partitions.First().LastUpdate:D}");
         }
+    }
+}
+
+static async Task ChatUsingSemanticKernel_KernelMemory_Chat(IKernelMemory kernelMemory,IChatCompletionService chatService)
+{
+    //chat setup
+    var systemPrompt = """
+                           You are a helpful assistant replying to user questions using information from your memory.
+                           Reply very briefly and concisely, get to the point immediately. Don't provide long explanations unless necessary.
+                           Sometimes you don't have relevant memories so you reply saying you don't know, don't have the information.
+                           The topic of the conversation is Data Fabric application.
+                           """;
+
+    var chatHistory = new ChatHistory(systemPrompt);
+
+    // Start the chat
+    var assistantMessage = "Hello, how can I help?";
+    Console.WriteLine($"Copilot> {assistantMessage}\n");
+    chatHistory.AddAssistantMessage(assistantMessage);
+
+    // Infinite chat loop
+    var reply = new StringBuilder();
+
+    while(true)
+    {
+        // Get user message (retry if the user enters an empty string)
+        Console.Write("You> ");
+        var userMessage = Console.ReadLine()?.Trim();
+        if (string.IsNullOrWhiteSpace(userMessage)) { continue; }
+        else { chatHistory.AddUserMessage(userMessage); }
+
+        // Use KM to generate an answer. Fewer tokens, but one extra LLM request.
+        MemoryAnswer memoryAnswer = await kernelMemory.AskAsync(userMessage);
+        var answer = memoryAnswer.Result;
+
+        // Inject the memory recall in the initial system message
+        chatHistory[0].Content = $"{systemPrompt}\n\nLong term memory:\n{answer}";
+
+        // Generate the next chat message, stream the response
+        Console.Write("\nCopilot> ");
+        reply.Clear();
+
+        await foreach (StreamingChatMessageContent stream in chatService.GetStreamingChatMessageContentsAsync(chatHistory))
+        {
+            Console.Write(stream.Content);
+            reply.Append(stream.Content);
+        }
+
+        chatHistory.AddAssistantMessage(reply.ToString());
+        Console.WriteLine("\n");
     }
 }
