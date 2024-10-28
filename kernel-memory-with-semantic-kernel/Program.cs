@@ -3,9 +3,12 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.KernelMemory;
+using Microsoft.KernelMemory.AI.Ollama;
+using Microsoft.KernelMemory.AI.OpenAI;
 using Microsoft.SemanticKernel;
 using Microsoft.SemanticKernel.ChatCompletion;
 using Microsoft.SemanticKernel.Connectors.OpenAI;
+using Microsoft.SemanticKernel.Memory;
 using System.Reflection;
 using System.Text;
 
@@ -16,8 +19,11 @@ var config = new ConfigurationBuilder()
     .AddUserSecrets<Program>()
     .Build();
 
-var kernelMemoryBuilder = BuildKernelMemoryConfig(config);
-var kernelBuilder = BuildKernel(config);
+var useLocalChatCompletion = true;
+var useLocalTextEmbedding = true;
+
+var kernelMemoryBuilder = BuildKernelMemoryConfig(config, useLocalTextEmbedding);
+var kernelBuilder = BuildKernel(config, useLocalChatCompletion);
 
 var kernel = kernelBuilder.Build();
 var memory = kernelMemoryBuilder.Build<MemoryServerless>();
@@ -32,47 +38,94 @@ await AddFileToMemoryForInjestion(memory);
 var chatCompletionService = kernel.GetRequiredService<IChatCompletionService>();
 await ChatUsingSemanticKernel_KernelMemory_Chat(memory,chatCompletionService);
 
-static IKernelBuilder BuildKernel(IConfigurationRoot configuration)
+static IKernelBuilder BuildKernel(IConfigurationRoot configuration,bool useAzureChat)
 {
     var builder = Kernel.CreateBuilder();
 
-    builder.Services.AddLogging(c => c.AddDebug().SetMinimumLevel(LogLevel.Trace));
+    // add logging
+    builder.Services.AddLogging(services => services.AddConsole().SetMinimumLevel(LogLevel.Critical));
 
-    builder.AddAzureOpenAIChatCompletion(
-        deploymentName: configuration["AZURE_OPENAI_DEPLOYMENT_NAME"],
-        endpoint: configuration["AZURE_OPENAI_ENDPOINT"],
-        apiKey: configuration["AZURE_OPENAI_API_KEY"]
+    if(useAzureChat)
+    {
+        builder.AddAzureOpenAIChatCompletion(
+            deploymentName: configuration["AZURE_OPENAI_DEPLOYMENT_NAME"],
+            endpoint: configuration["AZURE_OPENAI_ENDPOINT"],
+            apiKey: configuration["AZURE_OPENAI_API_KEY"]
+            );
+    }
+    else
+    {
+        var endpoint = new Uri("http://localhost:11434");
+        builder.AddOpenAIChatCompletion(
+        endpoint: endpoint,
+        apiKey: "no need",
+        modelId: "llama3.2"
         );
-    //;
+    }
+    
     return builder;
 }
 
-static IKernelMemoryBuilder BuildKernelMemoryConfig(IConfigurationRoot config)
+static IKernelMemoryBuilder BuildKernelMemoryConfig(IConfigurationRoot config,bool useLocalTextEmbedding)
 {
-    return new KernelMemoryBuilder()
-    .WithAzureOpenAITextEmbeddingGeneration(new()
+    var kernelBuilder = new KernelMemoryBuilder()
+
+        .Configure(builder => builder.Services.AddLogging(l =>
+        {
+            l.SetMinimumLevel(LogLevel.Critical);
+            l.AddConsole();
+        }));
+
+    if(useLocalTextEmbedding)
     {
-        APIType = AzureOpenAIConfig.APITypes.EmbeddingGeneration,
-        Auth = AzureOpenAIConfig.AuthTypes.APIKey,
-        Endpoint = config["AZURE_OPENAI_ENDPOINT"],
-        APIKey = config["AZURE_OPENAI_API_KEY"],
-        Deployment = "text-embedding-ada-002" // text-embedding-ada-002
-    })
-    .WithAzureOpenAITextGeneration(new()
+        var ollamaConfig = new OllamaConfig
+        {
+            Endpoint = "http://localhost:11434",
+            TextModel = new OllamaModelConfig("llama3.2", 131072),
+            EmbeddingModel = new OllamaModelConfig("nomic-embed-text", 2048)
+        };
+        kernelBuilder
+            .WithOllamaTextGeneration(ollamaConfig, new GPT4oTokenizer())
+            .WithAzureOpenAITextEmbeddingGeneration(new()
+            {
+                APIType = AzureOpenAIConfig.APITypes.EmbeddingGeneration,
+                Auth = AzureOpenAIConfig.AuthTypes.APIKey,
+                Endpoint = config["AZURE_OPENAI_ENDPOINT"],
+                Deployment = "text-embedding-ada-002",
+                APIKey = config["AZURE_OPENAI_API_KEY"]
+            })
+            //.WithOllamaTextEmbeddingGeneration(ollamaConfig, new GPT4oTokenizer())
+            ;
+    }
+    else
     {
-        APIType = AzureOpenAIConfig.APITypes.ChatCompletion,
-        Auth = AzureOpenAIConfig.AuthTypes.APIKey,
-        Endpoint = config["AZURE_OPENAI_ENDPOINT"],
-        Deployment = config["AZURE_OPENAI_DEPLOYMENT_NAME"],
-        APIKey = config["AZURE_OPENAI_API_KEY"]
-    })
-    //.WithAzureAISearchMemoryDb(new()
-    //{
-    //    Auth = AzureAISearchConfig.AuthTypes.APIKey,
-    //    Endpoint = config["AZURE_OPEN_API_SEARCH_ENDPOINT"],
-    //    APIKey = config["AZURE_ADMIN_SEARCH_KEY"]
-    //})
-    .WithSimpleVectorDb();
+        kernelBuilder.WithAzureOpenAITextEmbeddingGeneration(new()
+        {
+            APIType = AzureOpenAIConfig.APITypes.EmbeddingGeneration,
+            Auth = AzureOpenAIConfig.AuthTypes.APIKey,
+            Endpoint = config["AZURE_OPENAI_ENDPOINT"],
+            APIKey = config["AZURE_OPENAI_API_KEY"],
+            Deployment = "text-embedding-ada-002" // text-embedding-ada-002
+        })
+        .WithAzureOpenAITextGeneration(new()
+        {
+            APIType = AzureOpenAIConfig.APITypes.ChatCompletion,
+            Auth = AzureOpenAIConfig.AuthTypes.APIKey,
+            Endpoint = config["AZURE_OPENAI_ENDPOINT"],
+            Deployment = config["AZURE_OPENAI_DEPLOYMENT_NAME"],
+            APIKey = config["AZURE_OPENAI_API_KEY"]
+        });
+        //.WithAzureAISearchMemoryDb(new()
+        //{
+        //    Auth = AzureAISearchConfig.AuthTypes.APIKey,
+        //    Endpoint = config["AZURE_OPEN_API_SEARCH_ENDPOINT"],
+        //    APIKey = config["AZURE_ADMIN_SEARCH_KEY"]
+        //})
+    }
+
+    kernelBuilder.WithSimpleVectorDb();
+
+    return kernelBuilder;
 }
 
 static async Task AddFileToMemoryForInjestion(IKernelMemory memory)
@@ -243,7 +296,8 @@ static async Task ChatUsingSemanticKernel_KernelMemory_Chat(IKernelMemory kernel
     var systemPrompt = """
                            You are a helpful assistant replying to user questions using information from your memory.
                            Reply very briefly and concisely, get to the point immediately. Don't provide long explanations unless necessary.
-                           Sometimes you don't have relevant memories so you reply saying you don't know, don't have the information.
+                           Do not answer any question that is not related to Data Fabric application. eg: who is the PM of India?
+                           fallback to unrelated questions say that "I do not know the answer to this question, Please ask question related to Data Fabric"
                            The topic of the conversation is Data Fabric application.
                            """;
 

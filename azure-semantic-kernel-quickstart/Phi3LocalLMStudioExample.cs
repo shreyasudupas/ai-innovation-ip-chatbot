@@ -7,7 +7,7 @@ namespace azure_semantic_kernel_quickstart
     {
         public async Task Run()
         {
-            var endpoint = "http://localhost:1234/v1/";
+            var endpoint = "http://localhost:11434/v1";
             var endpointUri = new Uri(endpoint);
             var modelId = "phi3";
 
