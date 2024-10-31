@@ -17,19 +17,19 @@ namespace IP.Chatbot.WebAPI.Controllers
         private readonly Kernel _kernel;
         private readonly ChatHistory _chatHistory;
         private readonly ILogger<ChatBotController> _logger;
-        private readonly MemoryWebClient _memoryWebClient;
+        private readonly IKernelMemory _kernelMemory;
         private readonly IChatCompletionService _chatCompletionService;
 
         public ChatBotController(ILogger<ChatBotController> logger,
             Kernel kernel,
             ChatHistory chatHistory,
-            MemoryWebClient memoryWebClient,
+            IKernelMemory kernelMemory,
             IChatCompletionService chatCompletionService)
         {
             _logger = logger;
             _kernel = kernel;
             _chatHistory = chatHistory;
-            _memoryWebClient = memoryWebClient;
+            _kernelMemory = kernelMemory;
             _chatCompletionService = chatCompletionService;
         }
 
@@ -50,7 +50,7 @@ namespace IP.Chatbot.WebAPI.Controllers
             _chatHistory.AddUserMessage(question);
 
             // Use KM to generate an answer. Fewer tokens, but one extra LLM request.
-            MemoryAnswer memoryAnswer = await _memoryWebClient.AskAsync(question);
+            MemoryAnswer memoryAnswer = await _kernelMemory.AskAsync(question);
             var answer = memoryAnswer.Result;
 
             // Inject the memory recall in the initial system message

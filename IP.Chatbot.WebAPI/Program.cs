@@ -2,6 +2,8 @@ using Microsoft.KernelMemory;
 using Microsoft.SemanticKernel;
 using Microsoft.SemanticKernel.ChatCompletion;
 
+var isServerlessMemory = true;
+
 var builder = WebApplication.CreateBuilder(args);
 
 IHostEnvironment env = builder.Environment;
@@ -18,9 +20,41 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-//Kernel Memeory Registraton
-var memory = new MemoryWebClient("http://127.0.0.1:9001");
-builder.Services.AddTransient((serviceProvider) => memory);
+IKernelMemory memory;
+if(!isServerlessMemory)
+{
+    //Kernel Memory Registraton
+    memory = new MemoryWebClient("http://127.0.0.1:9001");
+    builder.Services.AddTransient((serviceProvider) => memory);
+}
+else
+{
+    var kernelBuilder = new KernelMemoryBuilder()
+        .Configure(builder => builder.Services.AddLogging(l =>
+        {
+            l.SetMinimumLevel(LogLevel.Critical);
+            l.AddConsole();
+        }))
+        .WithAzureOpenAITextEmbeddingGeneration(new()
+        {
+            APIType = AzureOpenAIConfig.APITypes.EmbeddingGeneration,
+            Auth = AzureOpenAIConfig.AuthTypes.APIKey,
+            Endpoint = config["AZURE_OPENAI_ENDPOINT"],
+            APIKey = config["AZURE_OPENAI_API_KEY"],
+            Deployment = "text-embedding-ada-002" // text-embedding-ada-002
+        })
+        .WithAzureOpenAITextGeneration(new()
+        {
+            APIType = AzureOpenAIConfig.APITypes.ChatCompletion,
+            Auth = AzureOpenAIConfig.AuthTypes.APIKey,
+            Endpoint = config["AZURE_OPENAI_ENDPOINT"],
+            Deployment = config["AZURE_OPENAI_DEPLOYMENT_NAME"],
+            APIKey = config["AZURE_OPENAI_API_KEY"]
+        });
+
+    memory = kernelBuilder.Build();
+    builder.Services.AddTransient(sp => memory);
+}
 
 await AddFileToMemoryForInjestion(memory);
 

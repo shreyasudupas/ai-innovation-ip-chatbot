@@ -69,7 +69,6 @@ static IKernelBuilder BuildKernel(IConfigurationRoot configuration,bool useLocal
 static IKernelMemoryBuilder BuildKernelMemoryConfig(IConfigurationRoot config,bool useLocalTextEmbedding)
 {
     var kernelBuilder = new KernelMemoryBuilder()
-
         .Configure(builder => builder.Services.AddLogging(l =>
         {
             l.SetMinimumLevel(LogLevel.Critical);
