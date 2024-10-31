@@ -9,11 +9,15 @@
 
   <ItemGroup>
     <None Remove="Data\datafabric-agent-guide.docx" />
+    <None Remove="Data\Epicor Global Work Policy.pdf" />
     <None Remove="Data\retry-mechanism-for-events-datafabric.docx" />
   </ItemGroup>
 
   <ItemGroup>
     <Content Include="Data\datafabric-agent-guide.docx">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Data\Epicor Global Work Policy.pdf">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="Data\retry-mechanism-for-events-datafabric.docx">

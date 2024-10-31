@@ -297,8 +297,8 @@ static async Task ChatUsingSemanticKernel_KernelMemory_Chat(IKernelMemory kernel
                            You are a helpful assistant replying to user questions using information from your memory.
                            Reply very briefly and concisely, get to the point immediately. Don't provide long explanations unless necessary.
                            Do not answer any question that is not related to Data Fabric application. eg: who is the PM of India?
-                           fallback to unrelated questions say that "I do not know the answer to this question, Please ask question related to Data Fabric"
-                           The topic of the conversation is Data Fabric application.
+                           fallback to unrelated questions say that "I do not know the answer to this question, Please ask question related to Data Fabric or Epicor work policy"
+                           The topic of the conversation is Data Fabric application and Epicor global work policy.
                            """;
 
     var chatHistory = new ChatHistory(systemPrompt);

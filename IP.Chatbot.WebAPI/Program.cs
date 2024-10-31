@@ -63,7 +63,8 @@ static async Task AddFileToMemoryForInjestion(IKernelMemory memory)
 {
     var documentsToAdd = new Document("datafabric-docs")
         .AddFile("Data\\datafabric-agent-guide.docx")
-        .AddFile("Data\\retry-mechanism-for-events-datafabric.docx");
+        .AddFile("Data\\retry-mechanism-for-events-datafabric.docx")
+        .AddFile("Data\\Epicor Global Work Policy.pdf");
 
     await memory.ImportDocumentAsync(documentsToAdd);
 
