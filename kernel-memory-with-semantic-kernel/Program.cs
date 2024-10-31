@@ -19,8 +19,8 @@ var config = new ConfigurationBuilder()
     .AddUserSecrets<Program>()
     .Build();
 
-var useLocalChatCompletion = true;
-var useLocalTextEmbedding = true;
+var useLocalChatCompletion = false;
+var useLocalTextEmbedding = false;
 
 var kernelMemoryBuilder = BuildKernelMemoryConfig(config, useLocalTextEmbedding);
 var kernelBuilder = BuildKernel(config, useLocalChatCompletion);
@@ -38,22 +38,14 @@ await AddFileToMemoryForInjestion(memory);
 var chatCompletionService = kernel.GetRequiredService<IChatCompletionService>();
 await ChatUsingSemanticKernel_KernelMemory_Chat(memory,chatCompletionService);
 
-static IKernelBuilder BuildKernel(IConfigurationRoot configuration,bool useAzureChat)
+static IKernelBuilder BuildKernel(IConfigurationRoot configuration,bool useLocalChat)
 {
     var builder = Kernel.CreateBuilder();
 
     // add logging
     builder.Services.AddLogging(services => services.AddConsole().SetMinimumLevel(LogLevel.Critical));
 
-    if(useAzureChat)
-    {
-        builder.AddAzureOpenAIChatCompletion(
-            deploymentName: configuration["AZURE_OPENAI_DEPLOYMENT_NAME"],
-            endpoint: configuration["AZURE_OPENAI_ENDPOINT"],
-            apiKey: configuration["AZURE_OPENAI_API_KEY"]
-            );
-    }
-    else
+    if(useLocalChat)
     {
         var endpoint = new Uri("http://localhost:11434");
         builder.AddOpenAIChatCompletion(
@@ -61,6 +53,14 @@ static IKernelBuilder BuildKernel(IConfigurationRoot configuration,bool useAzure
         apiKey: "no need",
         modelId: "llama3.2"
         );
+    }
+    else
+    {
+        builder.AddAzureOpenAIChatCompletion(
+            deploymentName: configuration["AZURE_OPENAI_DEPLOYMENT_NAME"],
+            endpoint: configuration["AZURE_OPENAI_ENDPOINT"],
+            apiKey: configuration["AZURE_OPENAI_API_KEY"]
+            );
     }
     
     return builder;
@@ -322,6 +322,10 @@ static async Task ChatUsingSemanticKernel_KernelMemory_Chat(IKernelMemory kernel
         // Use KM to generate an answer. Fewer tokens, but one extra LLM request.
         MemoryAnswer memoryAnswer = await kernelMemory.AskAsync(userMessage);
         var answer = memoryAnswer.Result;
+
+        // Fetch raw chunks, using KM indexes. More tokens to process with the chat history, but only one LLM request.
+        //SearchResult memories = await kernelMemory.SearchAsync(userMessage, limit: 10);
+        //var answer = memories.Results.SelectMany(m => m.Partitions).Aggregate("", (sum, chunk) => sum + chunk.Text + "\n").Trim();
 
         // Inject the memory recall in the initial system message
         chatHistory[0].Content = $"{systemPrompt}\n\nLong term memory:\n{answer}";

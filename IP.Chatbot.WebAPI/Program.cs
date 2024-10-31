@@ -9,7 +9,9 @@ IHostEnvironment env = builder.Environment;
 // Add services to the container.
 var config = builder.Configuration
     .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
-    .AddJsonFile($"appsettings.{env.EnvironmentName}.json", true, true);
+    .AddJsonFile($"appsettings.{env.EnvironmentName}.json", true, true)
+    .AddUserSecrets<Program>()
+    .Build();
 
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
@@ -24,6 +26,11 @@ await AddFileToMemoryForInjestion(memory);
 
 //kernel registration
 builder.Services.AddSingleton<ChatHistory>();
+
+builder.Services.AddAzureOpenAIChatCompletion(
+    deploymentName: config["AZURE_OPENAI_DEPLOYMENT_NAME"],
+            endpoint: config["AZURE_OPENAI_ENDPOINT"],
+            apiKey: config["AZURE_OPENAI_API_KEY"]);
 
 // Finally, create the Kernel service with the service provider and plugin collection
 builder.Services.AddTransient((serviceProvider) => {

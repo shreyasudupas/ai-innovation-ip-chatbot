@@ -1,4 +1,5 @@
 ﻿using IP.Chatbot.Models;
+using IP.Chatbot.Models.Common;
 using IP.ChatBot.Blazor.Services;
 using Microsoft.AspNetCore.Components;
 using Microsoft.JSInterop;
@@ -22,9 +23,11 @@ namespace IP.ChatBot.Blazor.Components.Pages
 
         protected bool loadingChatMessage = false;
 
-        protected override void OnInitialized()
+        protected override async Task OnInitializedAsync()
         {
             chatMessages = new();
+
+            await AddSystemChat();
         }
 
         protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -66,6 +69,18 @@ namespace IP.ChatBot.Blazor.Components.Pages
         protected async Task clearChat()
         {
             chatMessages = new();
+        }
+
+        protected async Task AddSystemChat()
+        {
+            await Task.Delay(1500);
+
+            chatMessages.Add(new()
+            {
+                UserType = "ChatBot",
+                Content = CommonString.AssisantMessage,
+                CreatedDate = DateTime.Now.ToString("HH:mm tt")
+            });
         }
     }
 }
